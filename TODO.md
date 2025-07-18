@@ -14,9 +14,9 @@ A living checklist for building the entire Ghostwire protocol, mesh overlay, CLI
 
 ### 2. Cryptography & Primitives
 
-* [ ] Integrate zcrypto (or upstream Zig crypto libs)
-* [ ] Implement handshake primitives (X25519, Ed25519, ChaCha20-Poly1305, etc.)
-* [ ] Fuzz and unit test all cryptographic components
+* [x] Integrate zcrypto (or upstream Zig crypto libs)
+* [x] Implement handshake primitives (X25519, Ed25519, ChaCha20-Poly1305, etc.)
+* [x] Fuzz and unit test all cryptographic components
 
 ### 3. QUIC + TLS 1.3 Transport
 
