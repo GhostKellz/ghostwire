@@ -1,0 +1,90 @@
+[package]
+name = "ghostwire-client"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "ghostwire-client"
+path = "src/main.rs"
+
+[dependencies]
+ghostwire-common = { path = "../ghostwire-common" }
+ghostwire-proto = { path = "../ghostwire-proto" }
+
+# Core runtime
+tokio = { workspace = true, features = ["full"] }
+tokio-util = { workspace = true }
+
+# Network and crypto
+# boringtun = { workspace = true }  # Disabled due to dependency conflicts
+x25519-dalek = { workspace = true }
+blake3 = { workspace = true }
+rand = "0.8"
+
+# QUIC transport
+quinn = "0.10"
+rustls = "0.21"
+
+# Configuration and serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+toml = { workspace = true }
+
+# CLI
+clap = { workspace = true }
+
+# Networking
+socket2 = "0.5"
+cidr = { workspace = true }
+ipnet = { workspace = true }
+
+# Platform integration
+directories = "5.0"
+keyring = "2.3"
+
+# System integration
+nix = { version = "0.27", features = ["net", "socket", "uio"] }
+libc = "0.2"
+
+# Observability
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Utilities
+uuid = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+chrono = { workspace = true }
+base64 = "0.22"
+hex = { workspace = true }
+
+# HTTP client
+reqwest = { workspace = true }
+url = { workspace = true }
+
+# Configuration watching
+notify = "6.1"
+
+# Async utilities
+futures = "0.3"
+tokio-stream = "0.1"
+
+# Additional crypto and security
+rcgen = "0.12"
+open = "5.0"
+
+# Platform-specific
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winbase", "winsock2", "ws2ipdef", "iphlpapi"] }
+windows = { version = "0.52", features = ["Win32_NetworkManagement_IpHelper", "Win32_Networking_WinSock"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+system-configuration = "0.5"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+rtnetlink = "0.13"
+netlink-packet-route = "0.17"

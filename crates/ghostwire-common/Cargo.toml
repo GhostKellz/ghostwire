@@ -1,0 +1,25 @@
+[package]
+name = "ghostwire-common"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+uuid = { workspace = true }
+thiserror = { workspace = true }
+ipnet = { workspace = true }
+cidr = { workspace = true }
+ed25519-dalek = { workspace = true }
+x25519-dalek = { workspace = true }
+blake3 = { workspace = true }
+tokio = { workspace = true }
+humantime-serde = { workspace = true }
+chrono = { workspace = true }
+rand = "0.8"
+base64 = "0.22"
+subtle = { workspace = true }

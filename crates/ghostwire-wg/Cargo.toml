@@ -1,0 +1,54 @@
+[package]
+name = "ghostwire-wg"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = ["optimized"]
+optimized = ["simd", "multi-threaded"]
+simd = ["aes", "wide"]
+multi-threaded = ["tokio/rt-multi-thread", "rayon"]
+kernel-fallback = []
+
+[dependencies]
+ghostwire-common = { path = "../ghostwire-common" }
+
+# Core async runtime
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+
+# High-performance crypto
+aes = { workspace = true, optional = true }
+chacha20poly1305 = { workspace = true }
+poly1305 = { workspace = true }
+
+# WireGuard implementations
+boringtun = { workspace = true }
+
+# SIMD and vectorization
+wide = { workspace = true, optional = true }
+
+# Multi-threading
+rayon = { version = "1.10", optional = true }
+crossbeam-queue = "0.3"
+crossbeam-utils = "0.8"
+
+# QUIC integration
+quinn = { workspace = true }
+
+# Networking
+socket2 = "0.5"
+libc = "0.2"
+
+# Utilities
+thiserror = { workspace = true }
+tracing = { workspace = true }
+bytes = "1.7"
+parking_lot = "0.12"
+
+[dev-dependencies]
+criterion = "0.5"
+tokio-test = "0.4"

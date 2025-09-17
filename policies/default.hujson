@@ -1,0 +1,290 @@
+{
+  // GhostWire Default Policy Set
+  "metadata": {
+    "name": "Default Policy",
+    "version": "1.0.0",
+    "description": "Default access control policies for GhostWire mesh network",
+    "author": "GhostWire Team",
+    "created_at": "2024-01-01T00:00:00Z",
+    "modified_at": "2024-01-01T00:00:00Z",
+    "tags": ["default", "production"]
+  },
+
+  "rules": [
+    // High priority admin rule - allow all for admin users
+    {
+      "id": "admin-full-access",
+      "description": "Grant full access to admin users",
+      "priority": 1000,
+      "enabled": true,
+      "source": {
+        "principal_type": "user",
+        "groups": {
+          "type": "any",
+          "groups": ["admin", "administrators", "ghostwire-admins"]
+        }
+      },
+      "effect": "allow",
+      "metadata": {
+        "category": "admin",
+        "scope": "global"
+      }
+    },
+
+    // Service accounts have restricted access
+    {
+      "id": "service-account-restrictions",
+      "description": "Restrict service account capabilities",
+      "priority": 900,
+      "enabled": true,
+      "source": {
+        "principal_type": "service"
+      },
+      "target": {
+        "resource_type": "admin"
+      },
+      "effect": "deny",
+      "metadata": {
+        "category": "security",
+        "reason": "Service accounts cannot perform admin operations"
+      }
+    },
+
+    // Users can manage their own nodes
+    {
+      "id": "user-own-nodes",
+      "description": "Users can manage their own nodes",
+      "priority": 800,
+      "enabled": true,
+      "source": {
+        "principal_type": "user"
+      },
+      "target": {
+        "resource_type": "node",
+        "owners": ["${source.id}"] // Special variable for source user ID
+      },
+      "action": {
+        "categories": ["read", "write", "network"]
+      },
+      "effect": "allow",
+      "metadata": {
+        "category": "user-management"
+      }
+    },
+
+    // Production access restrictions during business hours
+    {
+      "id": "production-business-hours",
+      "description": "Restrict production access to business hours for non-admin users",
+      "priority": 700,
+      "enabled": true,
+      "source": {
+        "principal_type": "user",
+        "groups": {
+          "type": "none",
+          "groups": ["admin", "on-call", "devops"]
+        }
+      },
+      "target": {
+        "resource_type": "node",
+        "tags": {
+          "type": "any",
+          "tags": ["production", "prod", "critical"]
+        }
+      },
+      "context": {
+        "time_ranges": [
+          {
+            "start": "09:00",
+            "end": "17:00",
+            "days": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+            "timezone": "UTC"
+          }
+        ]
+      },
+      "effect": "deny",
+      "metadata": {
+        "category": "temporal-restriction",
+        "bypass": "contact-admin"
+      }
+    },
+
+    // VPN users can connect to development resources
+    {
+      "id": "dev-access",
+      "description": "Allow VPN users to access development resources",
+      "priority": 600,
+      "enabled": true,
+      "source": {
+        "principal_type": "user",
+        "groups": {
+          "type": "any",
+          "groups": ["developers", "qa", "engineers", "vpn-users"]
+        }
+      },
+      "target": {
+        "resource_type": "node",
+        "tags": {
+          "type": "any",
+          "tags": ["development", "dev", "staging", "test"]
+        }
+      },
+      "action": {
+        "exact": ["connect", "ping", "ssh"]
+      },
+      "effect": "allow",
+      "metadata": {
+        "category": "development-access"
+      }
+    },
+
+    // Geographic restrictions for sensitive resources
+    {
+      "id": "geo-restriction",
+      "description": "Restrict access from certain geographic locations",
+      "priority": 500,
+      "enabled": true,
+      "target": {
+        "resource_type": "node",
+        "tags": {
+          "type": "any",
+          "tags": ["sensitive", "financial", "pci"]
+        }
+      },
+      "context": {
+        "locations": ["US", "CA", "GB", "DE"] // Allow only from these countries
+      },
+      "effect": "deny",
+      "conditions": [
+        {
+          "condition_type": "location",
+          "parameters": {
+            "allowed_locations": "US,CA,GB,DE"
+          },
+          "negate": true // Deny if NOT in allowed locations
+        }
+      ],
+      "metadata": {
+        "category": "geographic-security",
+        "compliance": "data-residency"
+      }
+    },
+
+    // IP-based access control for office networks
+    {
+      "id": "office-network-access",
+      "description": "Allow broader access from office networks",
+      "priority": 400,
+      "enabled": true,
+      "context": {
+        "source_ips": [
+          "192.168.1.0/24",    // Main office
+          "10.0.0.0/16",       // Corporate VPN
+          "172.16.0.0/12"      // Branch offices
+        ]
+      },
+      "target": {
+        "resource_type": "node",
+        "tags": {
+          "type": "any",
+          "tags": ["internal", "corporate"]
+        }
+      },
+      "effect": "allow",
+      "metadata": {
+        "category": "network-based-access"
+      }
+    },
+
+    // Rate limiting for API access
+    {
+      "id": "api-rate-limiting",
+      "description": "Rate limit API access for non-admin users",
+      "priority": 300,
+      "enabled": true,
+      "source": {
+        "principal_type": "user",
+        "groups": {
+          "type": "none",
+          "groups": ["admin", "service-accounts"]
+        }
+      },
+      "target": {
+        "resource_type": "api"
+      },
+      "effect": "allow", // Allow but with conditions
+      "conditions": [
+        {
+          "condition_type": "rate_limit",
+          "parameters": {
+            "requests_per_minute": "100",
+            "burst_size": "20"
+          },
+          "negate": false
+        }
+      ],
+      "metadata": {
+        "category": "rate-limiting"
+      }
+    },
+
+    // Guest user restrictions
+    {
+      "id": "guest-restrictions",
+      "description": "Limit guest user capabilities",
+      "priority": 200,
+      "enabled": true,
+      "source": {
+        "principal_type": "user",
+        "groups": {
+          "type": "any",
+          "groups": ["guest", "temporary", "contractor"]
+        }
+      },
+      "target": {
+        "resource_type": "node",
+        "tags": {
+          "type": "any",
+          "tags": ["production", "sensitive", "admin"]
+        }
+      },
+      "effect": "deny",
+      "metadata": {
+        "category": "guest-security",
+        "escalation": "sponsor-approval-required"
+      }
+    },
+
+    // Read-only access for monitoring systems
+    {
+      "id": "monitoring-readonly",
+      "description": "Allow monitoring systems read-only access",
+      "priority": 100,
+      "enabled": true,
+      "source": {
+        "principal_type": "service",
+        "names": ["prometheus*", "grafana*", "monitoring*"]
+      },
+      "action": {
+        "categories": ["read"]
+      },
+      "effect": "allow",
+      "metadata": {
+        "category": "monitoring"
+      }
+    },
+
+    // Default deny rule (lowest priority)
+    {
+      "id": "default-deny",
+      "description": "Default deny rule - denies all unmatched requests",
+      "priority": -1000,
+      "enabled": true,
+      "effect": "deny",
+      "metadata": {
+        "category": "default",
+        "note": "This rule catches all unmatched requests"
+      }
+    }
+  ]
+}

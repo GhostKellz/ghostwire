@@ -1,4 +1,170 @@
-/zig-cache/
-/zig-out/
+/target
+Cargo.lock
+**/*.rs.bk
+
+
+# Added by cargo
+#
+# already existing elements were commented out
+
+#/target
+
+# ============================
+# Rust / Cargo
+# ============================
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Ignore coverage & profiling outputs
+*.profraw
+*.profdata
+coverage/
+tarpaulin-report.html
+
+# Cargo workspaces
+.crates.toml
+.crates2.json
+
+# ============================
+# Zig
+# ============================
+zig-cache/
+zig-out/
 *.o
+*.obj
 *.exe
+*.dll
+*.so
+*.dylib
+
+# ============================
+# Build tools / CI
+# ============================
+/dist/
+/build/
+/out/
+/tmp/
+/logs/
+*.log
+
+# ============================
+# Node / Frontend (if added later)
+# ============================
+node_modules/
+*.tsbuildinfo
+.next/
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# ============================
+# Docker / Containers
+# ============================
+*.pid
+*.seed
+*.tar
+*.img
+*.qcow2
+*.iso
+docker-compose.override.yml
+.env
+.env.local
+.env.*.local
+
+# ============================
+# Kubernetes / Helm
+# ============================
+*.release.yaml
+chart/charts/
+values.override.yaml
+
+# ============================
+# System / Editor junk
+# ============================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.nfs*
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.swm
+*.kate-swp
+*.orig
+*.rej
+
+# JetBrains
+*.iml
+*.ipr
+*.iws
+out/
+
+# ============================
+# Docs / Generated
+# ============================
+/docs/_build/
+/docs/book/
+/docs/target/
+/docs/generated/
+
+# ============================
+# Archive / Reference
+# ============================
+/archive/
+/archive/headscale/.git
+/archive/tailscale/.git
+/archive/**/.git
+
+# ============================
+# Certificates / Secrets
+# ============================
+certs/
+secrets/
+*.key
+*.crt
+*.pem
+*.p12
+*.jks
+*.der
+*.gpg
+*.age
+*.asc
+
+# ============================
+# Logs / State
+# ============================
+*.sqlite
+*.db
+*.dump
+*.bak
+*.old
+*.swp
+*.tmp
+*.lock
+*.state
+*.cache
+.cache/
+
+# ============================
+# Misc
+# ============================
+tags
+ctags
+cscope.out
+

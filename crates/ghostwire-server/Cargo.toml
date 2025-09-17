@@ -1,0 +1,86 @@
+[package]
+name = "ghostwire-server"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "ghostwire_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ghostwire-server"
+path = "src/main.rs"
+
+[dependencies]
+ghostwire-common = { path = "../ghostwire-common" }
+ghostwire-proto = { path = "../ghostwire-proto" }
+
+# Core runtime
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+
+# HTTP/gRPC server
+axum = { workspace = true }
+tonic = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+
+# Database
+sqlx = { workspace = true }
+libsql = { workspace = true }
+
+# Config & serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+toml = { workspace = true }
+config = { workspace = true }
+
+# CLI
+clap = { workspace = true }
+
+# Observability
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+prometheus = { workspace = true }
+
+# Utilities
+uuid = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+chrono = { workspace = true }
+blake3 = { workspace = true }
+rand = "0.8"
+base64 = "0.22"
+hex = { workspace = true }
+subtle = { workspace = true }
+x25519-dalek = { workspace = true }
+cidr = { workspace = true }
+ipnet = { workspace = true }
+tokio-stream = "0.1"
+futures = "0.3"
+jsonwebtoken = { workspace = true }
+openidconnect = { workspace = true }
+oauth2 = { workspace = true }
+reqwest = { workspace = true }
+url = { workspace = true }
+argon2 = { workspace = true }
+
+# Policy engine
+regex = "1.10"
+glob = "0.3"
+
+# DNS server
+trust-dns-server = "0.23"
+
+# DERP/STUN server
+quinn = "0.10"
+rustls = "0.21"
+byteorder = "1.5"
+crc32fast = "1.4"
+
+# WebSocket support
+tokio-tungstenite = "0.20"

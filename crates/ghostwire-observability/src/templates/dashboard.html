@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GhostWire Observability Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .status-healthy { @apply bg-green-100 text-green-800; }
+        .status-degraded { @apply bg-yellow-100 text-yellow-800; }
+        .status-unhealthy { @apply bg-red-100 text-red-800; }
+        .metric-card { @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        🔗 GhostWire Observability
+                    </h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="last-updated" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                    <button id="refresh-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8">
+                <a href="#overview" class="nav-link border-b-2 border-blue-500 text-blue-600 py-4 px-1 text-sm font-medium">
+                    Overview
+                </a>
+                <a href="#metrics" class="nav-link border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-4 px-1 text-sm font-medium">
+                    Metrics
+                </a>
+                <a href="#health" class="nav-link border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-4 px-1 text-sm font-medium">
+                    Health
+                </a>
+                <a href="#alerts" class="nav-link border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-4 px-1 text-sm font-medium">
+                    Alerts
+                </a>
+                <a href="#network" class="nav-link border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-4 px-1 text-sm font-medium">
+                    Network
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Overview Section -->
+        <div id="overview-section" class="dashboard-section">
+            <!-- Status Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="metric-card">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">System Status</p>
+                            <p id="system-status" class="text-2xl font-bold text-gray-900 dark:text-white">Healthy</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-green-100 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Active Connections</p>
+                            <p id="active-connections" class="text-2xl font-bold text-gray-900 dark:text-white">42</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-purple-100 rounded-lg">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Data Transferred</p>
+                            <p id="data-transferred" class="text-2xl font-bold text-gray-900 dark:text-white">512 MB</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-yellow-100 rounded-lg">
+                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.864-.833-2.634 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Active Alerts</p>
+                            <p id="active-alerts" class="text-2xl font-bold text-gray-900 dark:text-white">2</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="metric-card">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Network Traffic</h3>
+                    <canvas id="network-chart" height="200"></canvas>
+                </div>
+
+                <div class="metric-card">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">System Resources</h3>
+                    <canvas id="system-chart" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Health Checks -->
+            <div class="metric-card">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Health Checks</h3>
+                <div id="health-checks-list" class="space-y-3">
+                    <!-- Health checks will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Other sections will be shown/hidden based on navigation -->
+        <div id="metrics-section" class="dashboard-section hidden">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Detailed Metrics</h2>
+            <!-- Metrics content -->
+        </div>
+
+        <div id="health-section" class="dashboard-section hidden">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">System Health</h2>
+            <!-- Health content -->
+        </div>
+
+        <div id="alerts-section" class="dashboard-section hidden">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Alerts & Notifications</h2>
+            <!-- Alerts content -->
+        </div>
+
+        <div id="network-section" class="dashboard-section hidden">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Network Topology</h2>
+            <!-- Network content -->
+        </div>
+    </main>
+
+    <script>
+        // Dashboard JavaScript
+        let charts = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            loadDashboardData();
+            setupNavigation();
+            setupAutoRefresh();
+        });
+
+        function initializeCharts() {
+            // Network Traffic Chart
+            const networkCtx = document.getElementById('network-chart').getContext('2d');
+            charts.network = new Chart(networkCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Bytes Sent',
+                        data: [],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Bytes Received',
+                        data: [],
+                        borderColor: 'rgb(34, 197, 94)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // System Resources Chart
+            const systemCtx = document.getElementById('system-chart').getContext('2d');
+            charts.system = new Chart(systemCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CPU', 'Memory', 'Disk'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgb(239, 68, 68)',
+                            'rgb(251, 191, 36)',
+                            'rgb(34, 197, 94)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load metrics summary
+                const metricsResponse = await fetch('/api/metrics/summary');
+                const metrics = await metricsResponse.json();
+                updateMetricsDisplay(metrics);
+
+                // Load health status
+                const healthResponse = await fetch('/api/health');
+                const health = await healthResponse.json();
+                updateHealthDisplay(health);
+
+                // Load alerts
+                const alertsResponse = await fetch('/api/alerts');
+                const alerts = await alertsResponse.json();
+                updateAlertsDisplay(alerts);
+
+                // Update last updated time
+                document.getElementById('last-updated').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+            }
+        }
+
+        function updateMetricsDisplay(metrics) {
+            document.getElementById('active-connections').textContent = metrics.connections.active;
+            document.getElementById('data-transferred').textContent = formatBytes(metrics.network.bytes_sent + metrics.network.bytes_received);
+
+            // Update system chart
+            charts.system.data.datasets[0].data = [
+                metrics.system.cpu_usage_percent,
+                metrics.system.memory_usage_percent,
+                metrics.system.disk_usage_percent
+            ];
+            charts.system.update();
+        }
+
+        function updateHealthDisplay(health) {
+            const statusElement = document.getElementById('system-status');
+            statusElement.textContent = health.overall_status;
+            statusElement.className = `text-2xl font-bold status-${health.overall_status.toLowerCase()}`;
+
+            // Update health checks list
+            const healthChecksList = document.getElementById('health-checks-list');
+            healthChecksList.innerHTML = health.checks.map(check => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 rounded-full mr-3 ${getStatusColor(check.status)}"></div>
+                        <span class="font-medium text-gray-900 dark:text-white">${check.name}</span>
+                    </div>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">${check.status}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateAlertsDisplay(alerts) {
+            document.getElementById('active-alerts').textContent = alerts.stats.firing_alerts;
+        }
+
+        function setupNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    // Update active nav
+                    document.querySelectorAll('.nav-link').forEach(l => {
+                        l.className = 'nav-link border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-4 px-1 text-sm font-medium';
+                    });
+                    this.className = 'nav-link border-b-2 border-blue-500 text-blue-600 py-4 px-1 text-sm font-medium';
+
+                    // Show/hide sections
+                    const targetSection = this.getAttribute('href').substring(1) + '-section';
+                    document.querySelectorAll('.dashboard-section').forEach(section => {
+                        section.classList.add('hidden');
+                    });
+                    document.getElementById(targetSection).classList.remove('hidden');
+                });
+            });
+        }
+
+        function setupAutoRefresh() {
+            document.getElementById('refresh-btn').addEventListener('click', loadDashboardData);
+
+            // Auto-refresh every 30 seconds
+            setInterval(loadDashboardData, 30000);
+        }
+
+        function formatBytes(bytes) {
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let size = bytes;
+            let unitIndex = 0;
+
+            while (size >= 1024 && unitIndex < units.length - 1) {
+                size /= 1024;
+                unitIndex++;
+            }
+
+            return Math.round(size * 10) / 10 + ' ' + units[unitIndex];
+        }
+
+        function getStatusColor(status) {
+            switch (status.toLowerCase()) {
+                case 'healthy': return 'bg-green-500';
+                case 'degraded': return 'bg-yellow-500';
+                case 'unhealthy': return 'bg-red-500';
+                default: return 'bg-gray-500';
+            }
+        }
+    </script>
+</body>
+</html>

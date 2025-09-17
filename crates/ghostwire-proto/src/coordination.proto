@@ -1,0 +1,234 @@
+// GhostWire coordination protocol definitions
+//
+// This protocol defines the high-performance gRPC interface between
+// GhostWire nodes and the coordination server.
+
+syntax = "proto3";
+
+package ghostwire.coordination.v1;
+
+// Coordination service for node management and network map distribution
+service CoordinationService {
+  // Register a new node in the network
+  rpc RegisterNode(RegisterNodeRequest) returns (RegisterNodeResponse);
+
+  // Send heartbeat and receive network updates
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+
+  // Unregister a node from the network
+  rpc UnregisterNode(UnregisterNodeRequest) returns (UnregisterNodeResponse);
+
+  // Get current network map
+  rpc GetNetworkMap(NetworkMapRequest) returns (NetworkMapResponse);
+
+  // Stream real-time network map updates (future enhancement)
+  rpc StreamNetworkUpdates(StreamRequest) returns (stream NetworkUpdateEvent);
+}
+
+// Node registration request
+message RegisterNodeRequest {
+  string name = 1;                    // Node hostname/name
+  bytes public_key = 2;               // WireGuard public key (32 bytes)
+  repeated Endpoint endpoints = 3;     // Node endpoints
+  NodeCapabilities capabilities = 4;   // Node capabilities
+  optional string pre_auth_key = 5;   // Pre-authentication key
+  repeated string tags = 6;           // Node tags for ACL matching
+}
+
+// Node registration response
+message RegisterNodeResponse {
+  string node_id = 1;                 // Assigned node ID
+  string ipv4 = 2;                   // Assigned IPv4 address
+  optional string ipv6 = 3;          // Assigned IPv6 address (if supported)
+  string session_token = 4;          // Authentication token
+  NetworkMap network_map = 5;        // Initial network map
+  DerpMap derp_map = 6;             // DERP relay map
+}
+
+// Heartbeat request
+message HeartbeatRequest {
+  string node_id = 1;                // Node ID
+  string session_token = 2;          // Session authentication token
+  repeated Endpoint endpoints = 3;    // Current endpoints (if changed)
+  optional NodeStats stats = 4;      // Node statistics
+}
+
+// Heartbeat response
+message HeartbeatResponse {
+  optional NetworkMap network_map = 1;  // Updated network map (if changed)
+  uint64 next_heartbeat_seconds = 2;    // Next heartbeat interval
+  repeated string messages = 3;         // Server messages for the node
+}
+
+// Node unregistration request
+message UnregisterNodeRequest {
+  string node_id = 1;                // Node ID to unregister
+  string session_token = 2;          // Session authentication token
+}
+
+// Node unregistration response
+message UnregisterNodeResponse {
+  bool success = 1;                  // Unregistration success
+  string message = 2;                // Response message
+}
+
+// Network map request
+message NetworkMapRequest {
+  string node_id = 1;                // Requesting node ID
+  string session_token = 2;          // Session authentication token
+  optional uint64 current_version = 3; // Current map version (for delta updates)
+}
+
+// Network map response
+message NetworkMapResponse {
+  NetworkMap network_map = 1;        // Full or delta network map
+  bool is_delta = 2;                 // True if this is a delta update
+}
+
+// Stream request for real-time updates
+message StreamRequest {
+  string node_id = 1;                // Node ID
+  string session_token = 2;          // Session authentication token
+}
+
+// Network update event
+message NetworkUpdateEvent {
+  enum EventType {
+    PEER_ADDED = 0;
+    PEER_REMOVED = 1;
+    PEER_UPDATED = 2;
+    ACL_UPDATED = 3;
+    DNS_UPDATED = 4;
+  }
+
+  EventType event_type = 1;          // Type of update
+  optional Node peer = 2;            // Affected peer (for peer events)
+  optional NetworkMap full_map = 3;  // Full map (for ACL/DNS updates)
+  uint64 version = 4;                // Update version
+}
+
+// Network map structure
+message NetworkMap {
+  bytes node_key = 1;                // Node's own public key
+  repeated Node peers = 2;           // Authorized peer nodes
+  DnsConfig dns = 3;                 // DNS configuration
+  DerpMap derp_map = 4;             // DERP relay map
+  repeated PacketFilter packet_filters = 5; // Firewall rules
+  map<string, UserProfile> user_profiles = 6; // User information
+  string domain = 7;                 // Network domain
+  uint64 version = 8;                // Map version for caching
+}
+
+// Node information
+message Node {
+  string id = 1;                     // Node ID (UUID)
+  string user_id = 2;                // Owner user ID
+  string name = 3;                   // Node name/hostname
+  bytes public_key = 4;              // WireGuard public key
+  string ipv4 = 5;                   // IPv4 address
+  optional string ipv6 = 6;          // IPv6 address
+  repeated Endpoint endpoints = 7;    // Network endpoints
+  repeated string allowed_ips = 8;    // Allowed IP ranges (CIDR)
+  repeated Route routes = 9;          // Advertised routes
+  repeated string tags = 10;          // Node tags
+  int64 created_at = 11;             // Creation timestamp (Unix)
+  int64 last_seen = 12;              // Last seen timestamp (Unix)
+  optional int64 expires_at = 13;    // Expiration timestamp (Unix)
+  bool online = 14;                  // Online status
+}
+
+// Network endpoint
+message Endpoint {
+  string addr = 1;                   // IP:Port address
+  EndpointType type = 2;             // Endpoint type
+  optional uint32 preference = 3;    // Preference (lower = higher priority)
+}
+
+enum EndpointType {
+  UNKNOWN = 0;
+  DIRECT_IPV4 = 1;        // Direct IPv4 endpoint
+  DIRECT_IPV6 = 2;        // Direct IPv6 endpoint
+  STUN = 3;               // STUN-discovered endpoint
+  DERP = 4;               // DERP relay endpoint
+}
+
+// Route advertisement
+message Route {
+  string id = 1;                     // Route ID
+  string node_id = 2;                // Advertising node
+  string prefix = 3;                 // CIDR prefix
+  bool advertised = 4;               // Is advertised
+  bool enabled = 5;                  // Is enabled
+  bool is_primary = 6;               // Is primary route
+}
+
+// Node capabilities
+message NodeCapabilities {
+  bool can_derp = 1;                 // Can act as DERP relay
+  bool can_exit_node = 2;            // Can act as exit node
+  bool supports_ipv6 = 3;            // Supports IPv6
+  bool supports_pcp = 4;             // Supports PCP (Port Control Protocol)
+  bool supports_pmp = 5;             // Supports NAT-PMP
+  bool supports_upnp = 6;            // Supports UPnP
+}
+
+// Node statistics
+message NodeStats {
+  uint64 rx_bytes = 1;               // Bytes received
+  uint64 tx_bytes = 2;               // Bytes transmitted
+  uint32 active_connections = 3;     // Active connections
+  optional double latency_ms = 4;    // Average latency (ms)
+  optional double packet_loss = 5;   // Packet loss percentage
+}
+
+// DNS configuration
+message DnsConfig {
+  repeated string resolvers = 1;      // DNS resolver addresses
+  repeated string domains = 2;        // Search domains
+  bool magic_dns = 3;                // Enable MagicDNS
+  map<string, DnsRoutes> routes = 4; // DNS routing rules
+}
+
+message DnsRoutes {
+  repeated string resolvers = 1;      // Resolvers for this route
+}
+
+// DERP relay map
+message DerpMap {
+  map<uint32, DerpRegion> regions = 1; // Region ID -> Region info
+}
+
+message DerpRegion {
+  uint32 region_id = 1;              // Unique region identifier
+  string region_code = 2;            // Region code (e.g., "us-east")
+  string region_name = 3;            // Human-readable name
+  repeated DerpNode nodes = 4;       // DERP nodes in this region
+}
+
+message DerpNode {
+  string name = 1;                   // Node name
+  string hostname = 2;               // Hostname or IP
+  uint32 port = 3;                   // DERP port
+  bytes public_key = 4;              // Node public key
+  bool stun_only = 5;                // STUN-only node
+  optional uint32 stun_port = 6;     // STUN port (if different)
+}
+
+// Packet filter rules
+message PacketFilter {
+  repeated string src_ips = 1;        // Source IP patterns
+  repeated PortRange dst_ports = 2;   // Destination port ranges
+}
+
+message PortRange {
+  uint32 first = 1;                  // First port in range
+  uint32 last = 2;                   // Last port in range
+}
+
+// User profile information
+message UserProfile {
+  string id = 1;                     // User ID
+  string login_name = 2;             // Login name
+  string display_name = 3;           // Display name
+  optional string profile_pic_url = 4; // Profile picture URL
+}

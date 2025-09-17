@@ -1,0 +1,146 @@
+[workspace]
+members = [
+    "crates/ghostwire-server",
+    "crates/ghostwire-client",
+    "crates/ghostwire-common",
+    "crates/ghostwire-proto",
+    "crates/ghostwire-derp",
+    "crates/ghostwire-dns",
+    "crates/ghostwire-cli",
+    "crates/ghostwire-web",
+    "crates/ghostwire-desktop",
+    "crates/ghostwire-observability",
+    "crates/ghostwire-tests",
+    # "crates/ghostwire-wg",  # Disabled due to boringtun dependency conflicts
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["GhostWire Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ghostkellz/ghostwire"
+
+[workspace.dependencies]
+# Core async runtime
+tokio = { version = "1.42", features = ["full"] }
+tokio-util = "0.7"
+
+# HTTP/gRPC
+axum = "0.7"
+tonic = "0.12"
+tower = "0.5"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+toml = "0.8"
+humantime-serde = "1.1"
+ipnet = { version = "2.10", features = ["serde"] }
+
+# Database (using libsql for high performance)
+libsql = "0.4"
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"] }
+
+# Networking & QUIC
+quinn = "0.11"
+rustls = "0.23"
+
+# WireGuard - use stable userspace implementation
+# boringtun = "0.6"  # Disabled due to dependency conflicts
+
+# High-performance crypto for optimized userspace
+aes = "0.8"
+chacha20poly1305 = "0.10"
+poly1305 = "0.8"
+
+# SIMD and vectorization
+wide = "0.7"  # SIMD operations
+subtle = "2.6"  # Constant-time operations
+
+# Crypto (stable versions)
+x25519-dalek = "2.0"
+ed25519-dalek = "2.0"
+blake3 = "1.5"
+
+# Config & CLI
+clap = { version = "4.5", features = ["derive"] }
+config = "0.14"
+
+# Observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+prometheus = "0.13"
+
+# Utilities
+uuid = { version = "1.10", features = ["v4", "serde"] }
+thiserror = "1.0"
+anyhow = "1.0"
+cidr = { version = "0.2", features = ["serde"] }
+hex = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
+
+# HTTP middleware
+tower-http = { version = "0.5", features = ["cors", "compression-gzip", "trace", "timeout"] }
+
+# Authentication & Authorization
+jsonwebtoken = "9.3"
+openidconnect = "3.5"
+oauth2 = "4.4"
+keyring = "3.2"
+
+# Password hashing
+argon2 = "0.5"
+
+# Additional utilities
+url = "2.5"
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+
+# Desktop GUI dependencies
+eframe = "0.29"
+egui = "0.29"
+egui_extras = "0.29"
+egui_plot = "0.29"
+tray-icon = "0.18"
+dirs = "5.0"
+hostname = "0.4"
+rfd = "0.14"
+image = "0.25"
+
+# System integration
+fastrand = "2.1"
+
+# Testing dependencies
+criterion = { version = "0.5", features = ["html_reports", "async_tokio"] }
+proptest = "1.4"
+quickcheck = "1.0"
+rstest = "0.18"
+serial_test = "3.0"
+tempfile = "3.8"
+# wiremock = "0.6"  # Disabled - requires unstable Rust features
+tower-test = "0.4"
+hyper = "1.4"
+axum-test = "15.0"
+testcontainers = "0.20"
+testcontainers-modules = { version = "0.8", features = ["postgres", "redis"] }
+rand = "0.8"
+nix = "0.28"
+flamegraph = "0.6"
+pprof = { version = "0.13", features = ["flamegraph", "protobuf-codec"] }
+async-trait = "0.1"
+sha2 = "0.10"
+
+# Observability dependencies
+metrics = "0.23"
+metrics-exporter-prometheus = "0.15"
+opentelemetry = "0.24"
+opentelemetry-otlp = "0.17"
+opentelemetry_sdk = "0.24"
+opentelemetry-semantic-conventions = "0.16"
+tracing-opentelemetry = "0.25"
+tracing-appender = "0.2"
+sysinfo = "0.30"
+psutil = "3.2"
+num_cpus = "1.16"

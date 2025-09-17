@@ -1,0 +1,91 @@
+[package]
+name = "ghostwire-tests"
+version = "0.1.0"
+edition = "2024"
+authors = ["GhostWire Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ghostkellz/ghostwire"
+description = "Integration tests and benchmarks for GhostWire"
+
+[dependencies]
+# Core test dependencies
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Test utilities
+criterion = { version = "0.5", features = ["html_reports", "async_tokio"] }
+proptest = "1.4"
+quickcheck = "1.0"
+rstest = "0.18"
+serial_test = "3.0"
+tempfile = "3.8"
+# wiremock = "0.6"  # Disabled - requires unstable Rust features
+
+# HTTP/Network testing
+reqwest = { workspace = true }
+tower = { workspace = true }
+tower-test = "0.4"
+hyper = "1.4"
+axum-test = "15.0"
+
+# Database testing
+sqlx = { workspace = true }
+testcontainers = "0.20"
+testcontainers-modules = { version = "0.8", features = ["postgres", "redis"] }
+
+# Crypto testing
+rand = "0.8"
+hex = { workspace = true }
+
+# System testing
+sysinfo = { workspace = true }
+nix = "0.28"
+hostname = { workspace = true }
+
+# Performance testing
+flamegraph = "0.6"
+pprof = { version = "0.13", features = ["flamegraph", "protobuf-codec"] }
+
+# GhostWire crates
+ghostwire-common = { path = "../ghostwire-common" }
+ghostwire-server = { path = "../ghostwire-server" }
+ghostwire-client = { path = "../ghostwire-client" }
+ghostwire-cli = { path = "../ghostwire-cli" }
+ghostwire-derp = { path = "../ghostwire-derp" }
+ghostwire-dns = { path = "../ghostwire-dns" }
+ghostwire-observability = { path = "../ghostwire-observability" }
+ghostwire-proto = { path = "../ghostwire-proto" }
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports", "async_tokio"] }
+
+[[bench]]
+name = "network_throughput"
+harness = false
+
+[[bench]]
+name = "connection_establishment"
+harness = false
+
+[[bench]]
+name = "encryption_performance"
+harness = false
+
+[[bench]]
+name = "mesh_scaling"
+harness = false
+
+[[bench]]
+name = "derp_relay_performance"
+harness = false
+
+[features]
+default = ["integration-tests"]
+integration-tests = []
+performance-tests = []
+stress-tests = []
+chaos-tests = []

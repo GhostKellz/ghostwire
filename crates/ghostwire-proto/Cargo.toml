@@ -1,0 +1,22 @@
+[package]
+name = "ghostwire-proto"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+# gRPC & protobuf
+tonic = { workspace = true }
+prost = "0.13"
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Utilities
+uuid = { workspace = true }
+
+[build-dependencies]
+tonic-build = "0.12"

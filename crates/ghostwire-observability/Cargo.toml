@@ -1,0 +1,54 @@
+[package]
+name = "ghostwire-observability"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Comprehensive observability, metrics, and logging for GhostWire mesh VPN"
+
+[dependencies]
+# Core async runtime
+tokio = { workspace = true, features = ["full"] }
+tokio-util = { workspace = true }
+
+# Metrics and telemetry
+prometheus = { workspace = true }
+metrics = "0.23"
+metrics-exporter-prometheus = "0.15"
+opentelemetry = { version = "0.24", features = ["trace", "metrics"] }
+opentelemetry-otlp = { version = "0.17", features = ["trace", "metrics", "grpc-tonic"] }
+opentelemetry_sdk = { version = "0.24", features = ["trace", "metrics", "rt-tokio"] }
+opentelemetry-semantic-conventions = "0.16"
+
+# Logging
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter", "json", "registry"] }
+tracing-opentelemetry = "0.25"
+tracing-appender = "0.2"
+
+# Health checks and monitoring
+sysinfo = "0.30"
+psutil = "3.2"
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Utilities
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# Configuration
+config = { workspace = true }
+toml = { workspace = true }
+
+# HTTP server for metrics endpoint
+axum = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true, features = ["trace", "cors"] }
+
+# GhostWire crates
+ghostwire-common = { path = "../ghostwire-common" }

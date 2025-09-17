@@ -1,0 +1,29 @@
+[package]
+name = "ghostwire-dns"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+ghostwire-common = { path = "../ghostwire-common" }
+
+# Core runtime
+tokio = { workspace = true }
+
+# DNS libraries
+trust-dns-client = "0.23"
+trust-dns-server = "0.23"
+
+# Config & serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+
+# Observability
+tracing = { workspace = true }
+
+# Utilities
+thiserror = { workspace = true }
+anyhow = { workspace = true }
