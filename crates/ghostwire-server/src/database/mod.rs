@@ -10,12 +10,13 @@
 /// - Bitmap indexing for ACL evaluation
 
 pub mod connection;
+pub mod zqlite_connection;
 pub mod schema;
 pub mod migrations;
 pub mod models;
 pub mod operations;
 
-// Re-export commonly used types
-pub use connection::DatabaseConnection;
+// Re-export commonly used types - now using ZQLite
+pub use zqlite_connection::{ZQLiteDatabaseConnection as DatabaseConnection, ZQLiteTransaction, HealthCheckResult};
 pub use models::*;
 pub use operations::*;

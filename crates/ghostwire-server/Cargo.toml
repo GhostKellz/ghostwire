@@ -17,6 +17,7 @@ path = "src/main.rs"
 [dependencies]
 ghostwire-common = { path = "../ghostwire-common" }
 ghostwire-proto = { path = "../ghostwire-proto" }
+zqlite-rs = { path = "../zqlite-rs" }
 
 # Core runtime
 tokio = { workspace = true }

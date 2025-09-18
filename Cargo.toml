@@ -11,6 +11,7 @@ members = [
     "crates/ghostwire-desktop",
     "crates/ghostwire-observability",
     "crates/ghostwire-tests",
+    "crates/zqlite-rs",  # ZQLite FFI bindings
     # "crates/ghostwire-wg",  # Disabled due to boringtun dependency conflicts
 ]
 resolver = "2"

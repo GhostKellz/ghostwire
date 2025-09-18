@@ -1,0 +1,41 @@
+[package]
+name = "zqlite-rs"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+tokio = { workspace = true }
+async-trait = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+parking_lot = { workspace = true }
+dashmap = { workspace = true }
+crossbeam = { workspace = true }
+flume = { workspace = true }
+prometheus = { workspace = true }
+once_cell = { workspace = true }
+lazy_static = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+bytes = { workspace = true }
+futures = { workspace = true }
+pin-project = { workspace = true }
+arc-swap = { workspace = true }
+libc = "0.2"
+bindgen = "0.70"
+
+[build-dependencies]
+bindgen = "0.70"
+cc = "1.0"
+pkg-config = "0.3"
+
+[features]
+default = ["async", "pool", "metrics"]
+async = []
+pool = []
+metrics = []
+post-quantum = []
